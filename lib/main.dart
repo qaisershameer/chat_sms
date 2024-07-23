@@ -10,7 +10,7 @@ import 'package:chat_sms/screens/chat_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-      options: FirebaseOptions(
+      options: const FirebaseOptions(
         apiKey: 'AIzaSyAZoQ-bzEPF27axDNf9-kjsrWLaNRW8DEU',
         appId: '1:43107260101:android:8e74197a288984b865c2ac',
         messagingSenderId: '43107260101',

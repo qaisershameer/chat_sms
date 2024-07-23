@@ -1,9 +1,11 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_sms/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 final _firestore = FirebaseFirestore.instance;
+late User loggedInUser;
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -16,7 +18,6 @@ class ChatScreen extends StatefulWidget {
 class ChatScreenState extends State<ChatScreen> {
   final messageTextController = TextEditingController();
   final _auth = FirebaseAuth.instance;
-  late User loggedInUser;
   late String messageText;
 
   @override
@@ -36,29 +37,29 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void getMessages() async {
-    try {
-      final messages = await _firestore.collection('messages').get();
-      for (var message in messages.docs) {
-        // print(message.data());
-      }
-    } catch (e) {
-      // print(e);
-    }
-  }
-
-  void messageStream() async {
-    try {
-      await for (var snapshot
-          in _firestore.collection('messages').snapshots()) {
-        for (var message in snapshot.docs) {
-          // print(message.data());
-        }
-      }
-    } catch (e) {
-      // print(e);
-    }
-  }
+  // void getMessages() async {
+  //   try {
+  //     final messages = await _firestore.collection('messages').get();
+  //     for (var message in messages.docs) {
+  //       // print(message.data());
+  //     }
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
+  //
+  // void messageStream() async {
+  //   try {
+  //     await for (var snapshot
+  //         in _firestore.collection('messages').snapshots()) {
+  //       for (var message in snapshot.docs) {
+  //         // print(message.data());
+  //       }
+  //     }
+  //   } catch (e) {
+  //     // print(e);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +106,7 @@ class ChatScreenState extends State<ChatScreen> {
                         _firestore.collection("messages").add({
                           'text': messageText,
                           'sender': loggedInUser.email,
+                          'timestamp': FieldValue.serverTimestamp(),
                         });
                       }
                     },
@@ -138,19 +140,24 @@ class MessagesStream extends StatelessWidget {
             ),
           );
         }
-        final messages = snapshot.data!.docs; // Use ! operator
+        final messages = snapshot.data!.docs.reversed; // Use ! operator
         List<Widget> messageBubble = [];
         for (var message in messages) {
           final messageText = message['text'];
+          final timestamp = DateTime.timestamp();
           final messageSender = message['sender'];
+          final currentUser = loggedInUser.email;
 
           messageBubble.add(MessageBubble(
             sender: messageSender,
             text: messageText,
+            timestamp: timestamp,
+            isMe: currentUser == messageSender,
           ));
         }
         return Expanded(
           child: ListView(
+            reverse: true,
             padding:
                 const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
             children: messageBubble,
@@ -162,17 +169,25 @@ class MessagesStream extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  const MessageBubble({super.key, required this.sender, required this.text});
+  const MessageBubble(
+      {super.key,
+      required this.sender,
+      required this.text,
+      required this.timestamp,
+      required this.isMe});
 
   final String sender;
   final String text;
+  final DateTime timestamp;
+  final bool isMe;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             sender,
@@ -182,16 +197,24 @@ class MessageBubble extends StatelessWidget {
             ),
           ),
           Material(
-              borderRadius: BorderRadius.circular(30.0),
+              borderRadius: isMe
+                  ? const BorderRadius.only(
+                      topLeft: Radius.circular(30.0),
+                      bottomLeft: Radius.circular(30.0),
+                      bottomRight: Radius.circular(30.0))
+                  : const BorderRadius.only(
+                      topRight: Radius.circular(30.0),
+                      bottomLeft: Radius.circular(30.0),
+                      bottomRight: Radius.circular(30.0)),
               elevation: 5.0,
-              color: Colors.lightBlueAccent,
+              color: isMe ? Colors.lightBlueAccent : Colors.white,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10.0, vertical: 20.0),
                 child: Text(
                   text,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isMe ? Colors.white : Colors.black87,
                     fontSize: 15.0,
                   ),
                 ),
