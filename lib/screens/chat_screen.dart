@@ -131,7 +131,7 @@ class MessagesStream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('messages').snapshots(),
+      stream: _firestore.collection('messages').orderBy('timestamp').snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(
@@ -143,9 +143,12 @@ class MessagesStream extends StatelessWidget {
         final messages = snapshot.data!.docs.reversed; // Use ! operator
         List<Widget> messageBubble = [];
         for (var message in messages) {
+
           final messageText = message['text'];
           final timestamp = DateTime.timestamp();
+          //final timestamp = (message['timestamp'] as Timestamp).toDate(); // Convert Firestore Timestamp to DateTime
           final messageSender = message['sender'];
+
           final currentUser = loggedInUser.email;
 
           messageBubble.add(MessageBubble(
