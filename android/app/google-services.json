@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "43107260101",
+    "project_id": "chatsms-9d1ae",
+    "storage_bucket": "chatsms-9d1ae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:43107260101:android:8e74197a288984b865c2ac",
+        "android_client_info": {
+          "package_name": "com.example.chat_sms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZoQ-bzEPF27axDNf9-kjsrWLaNRW8DEU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
